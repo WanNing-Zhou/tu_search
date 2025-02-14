@@ -83,6 +83,7 @@ async function preloadImages(symbol: number) {
   imagesProperty.value = []
   for (let i = 0; i < len.value; i++) {
     if (symbol === flag.value) {
+      console.log('图片加载', i)
       await loadImage(props.images[i].src, i)
     } else {
       return false

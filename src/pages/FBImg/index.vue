@@ -222,8 +222,8 @@ const imgClickHandle = async (src: string) => {
 
       <div v-loading="pageLoading" ref="showBodyEl" class="content-body">
         <!--        <img :src="imgBase64"/>-->
-        <Waterfall :list="imagesList">
-          <template #default="{item}">
+        <WaterPull :images="imagesList">
+          <template #item="{item}">
             <el-popover
                 trigger="click"
                 :hide-after="0"
@@ -236,12 +236,12 @@ const imgClickHandle = async (src: string) => {
                 <div
                     class="image-link link-cursor"
                 >
-                  <LazyImg class="image-item" :src="item.src" :alt="item.name"/>
+                  <img class="image-item" :src="item.src" :alt="item.name"/>
                 </div>
               </template>
             </el-popover>
           </template>
-        </Waterfall>
+        </WaterPull>
         <div class="load-footer" v-if="loading"><p>正在全力加载中。。。</p></div>
       </div>
     </div>
