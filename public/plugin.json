@@ -1,0 +1,35 @@
+{
+  "main": "index.html",
+  "preload": "preload/services.js",
+  "logo": "logo.png",
+  "development": {
+    "main": "http://localhost:5173"
+  },
+  "features": [
+    {
+      "code": "search",
+      "explain": "以图搜图",
+      "cmds": [
+        "以图搜图",
+        {
+          "type": "img",
+          "label": "以图搜图"
+        },
+        {
+          "type": "files",
+          "label": "以图搜图",
+          "fileType": "file",
+          "match": ".*\\.(jpg|jpeg|png|webp|gif|bmp)$",
+          "maxLength": 1
+        }
+      ]
+    },
+    {
+      "code": "find",
+      "explain": "搜图",
+      "cmds": [
+           "搜图"
+      ]
+    }
+  ]
+}
