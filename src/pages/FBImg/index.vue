@@ -5,9 +5,8 @@ import {onMounted, ref, watch} from "vue";
 import searchList from "./searchList";
 import {base64ToFile, fileToBase64, handleError, imageToBase64} from "../../utils.ts";
 import {UploadFilled} from "@element-plus/icons-vue";
-import WaterPull from '../../components/WaterPull/WaterPull.vue'
 import {useScroll} from '@vueuse/core'
-import {LazyImg, Waterfall} from "vue-waterfall-plugin-next";
+import Waterfall from "wq-waterfall-vue3";
 // import {ElMessage} from "element-plus";
 
 
@@ -103,6 +102,7 @@ watch(imgBase64, async (newVal, oldVal) => {
       name: item.title,
     }
   })
+  console.log('imagesList', imagesList.value)
   pageLoading.value = false
 }, {once: true})
 
@@ -128,7 +128,7 @@ const loadHandle = async () => {
 
   imagesList.value.splice(imagesList.value.length, 0, ...newList)
 
-  console.log('newList' + page.value, imagesList.value)
+  console.log('newList' + page.value, newList.value)
 
   loading.value = false
 
@@ -179,8 +179,6 @@ const saveHandle = async (src: string, name?: string) => {
   }
 }
 
-const imgClickHandle = async (src: string) => {
-}
 
 
 </script>
@@ -222,26 +220,26 @@ const imgClickHandle = async (src: string) => {
 
       <div v-loading="pageLoading" ref="showBodyEl" class="content-body">
         <!--        <img :src="imgBase64"/>-->
-        <WaterPull :images="imagesList">
+        <Waterfall  v-if="imagesList.length" :maxParallelTasks="4" :images="imagesList">
           <template #item="{item}">
             <el-popover
                 trigger="click"
                 :hide-after="0"
             >
               <div class="center">
-                <el-button size="small" @click="copyHandle(item.src)" text>复制</el-button>
-                <el-button size="small" @click="saveHandle(item.src, item.name)" text>保存</el-button>
+                <el-button size="small" @click="copyHandle(item.data.src)" text>复制</el-button>
+                <el-button size="small" @click="saveHandle(item.url, item.data?.name)" text>保存</el-button>
               </div>
               <template #reference>
                 <div
                     class="image-link link-cursor"
                 >
-                  <img class="image-item" :src="item.src" :alt="item.name"/>
+<!--                  <img class="image-item" :src="item.data.src" :alt="item.data?.name"/>-->
                 </div>
               </template>
             </el-popover>
           </template>
-        </WaterPull>
+        </Waterfall>
         <div class="load-footer" v-if="loading"><p>正在全力加载中。。。</p></div>
       </div>
     </div>
@@ -353,11 +351,13 @@ const imgClickHandle = async (src: string) => {
   display: block;
   height: 100%;
   cursor: default;
+  border: #1a1a1a solid 1px;
 
   .image-item {
+    border-radius: 8px;
     width: 100%;
     height: 100%;
-    border-radius: var(--border-radius);
+    //border-radius: var(--border-radius);
     display: inline-block;
     vertical-align: bottom;
   }

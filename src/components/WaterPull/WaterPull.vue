@@ -54,6 +54,7 @@ watch(
       console.error('height', height.value)
       preColumnHeight.value = Array(props.columnCount).fill(height.value )
       flag.value++
+      console.log('flag', flag.value)
       preloadImages(flag.value)
     },
     {
@@ -72,6 +73,7 @@ function updateWatefall() {
   if (props.images.length && currentWidth !== waterfallWidth.value) {
     waterfallWidth.value = currentWidth
     flag.value++
+    console.log('flag', flag.value, 'width', waterfallWidth.value)
     preloadImages(flag.value)
   }
 }
@@ -84,6 +86,7 @@ async function preloadImages(symbol: number) {
   for (let i = 0; i < len.value; i++) {
     if (symbol === flag.value) {
       console.log('图片加载', i)
+      console.log(symbol, flag.value)
       await loadImage(props.images[i].src, i)
     } else {
       return false

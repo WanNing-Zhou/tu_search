@@ -1,6 +1,7 @@
 {
   "type": "module",
   "scripts": {
+    "ex_dev": "vite",
     "dev": "vite",
     "build": "vite build"
   },
@@ -11,7 +12,8 @@
     "element-plus": "^2.9.3",
     "vue": "^3.5.13",
     "vue-waterfall-easy": "^2.4.4",
-    "vue-waterfall-plugin-next": "^2.6.5"
+    "vue-waterfall-plugin-next": "^2.6.5",
+    "wq-waterfall-vue3": "^1.0.3"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
