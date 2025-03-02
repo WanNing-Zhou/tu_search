@@ -30,8 +30,8 @@ importers:
         specifier: ^2.6.5
         version: 2.6.5
       wq-waterfall-vue3:
-        specifier: ^1.0.3
-        version: 1.0.3(vue@3.5.13)
+        specifier: ^1.1.1
+        version: 1.1.1
     devDependencies:
       '@vitejs/plugin-vue':
         specifier: ^5.2.1
@@ -1925,10 +1925,8 @@ packages:
     resolution: {integrity: sha512-qEcY+KJYlWyLH9vNbsr6/5j59AXk5ni5aakf8ldzBvGde6Iz4sxZGkJyWSAueTG7QhOvNRYb1lDdFmL5Td0QKA==}
     engines: {node: '>= 0.4'}
 
-  wq-waterfall-vue3@1.0.3:
-    resolution: {integrity: sha512-hxbJ9t++AnUHVTPAVXhg1+JyadU6dcvCCKQNruMfHSoKnSCM424sGrYImlFSvibXXH2Y2S//EttaVXttc61PCA==}
-    peerDependencies:
-      vue: ^3.2.0
+  wq-waterfall-vue3@1.1.1:
+    resolution: {integrity: sha512-78AZXztSDCr9CDnTUdtdOmvvFmw0ih5UUiDWx2T7IR4nLBj5L8+jmxY8QgNu5Cy83iYw/ZQ1ZI0YrtCBNq8xTA==}
 
 snapshots:
 
@@ -3960,6 +3958,4 @@ snapshots:
       gopd: 1.2.0
       has-tostringtag: 1.0.2
 
-  wq-waterfall-vue3@1.0.3(vue@3.5.13):
-    dependencies:
-      vue: 3.5.13
+  wq-waterfall-vue3@1.1.1: {}

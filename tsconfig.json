@@ -44,6 +44,7 @@
     "src/**/*.jpg",
     "src/**/*.svg",
     "vite.config.ts",
-    "**/*.d.ts"
+    "**/*.d.ts",
+    "src/global.d.ts"
   ]
 }

@@ -32,6 +32,6 @@ onMounted(() => {
     <FBImg :enter-action="enterAction"></FBImg>
   </template>
   <template v-if="route === 'find'">
-    <FBWord :enter-action="enterAction"></FBWord>/
+    <FBWord :enter-action="enterAction"></FBWord>
   </template>
 </template>

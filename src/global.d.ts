@@ -1,6 +1,6 @@
 
 declare global {
-    interface window {
+   export interface window {
         services: {
             saveFile(b64: string, name: string): void;
             readFile(filePath: string): File;
@@ -8,5 +8,3 @@ declare global {
         };
     }
 }
-
-export {};

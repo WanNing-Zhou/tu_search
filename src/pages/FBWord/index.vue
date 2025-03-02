@@ -1,42 +1,197 @@
-
 <script lang="ts" setup>
-import {ref, watch} from "vue";
+import {nextTick, reactive, ref, watch} from "vue";
+import Waterfall from "wq-waterfall-vue3";
+import {handleError, imageToBase64} from "@/utils.ts";
 
-type Prop = {
-  enterAction: any
-}
+const searchList = [
+  {
+    alias: "必应",
+    name: "bing",
+  },
+  {
+    alias: "搜狗",
+    name: "sougou",
+  },
+  {
+    alias: "百度",
+    name: "baidu",
+  }
+]
 
-const props = defineProps<Prop>()
-watch(props.enterAction,()=>{
-  console.log(props.enterAction)
+const inputVal = ref('')
+const searchVal = reactive({
+  search: '',
+  page: 0,
+  engine: 'bing',
 })
-// const val = ref('')
-// utools.setSubInput(({text}) => {
-//   val.value = text
+const imagesList = ref<any[]>([])
+const pageLoading = ref(false)
+const loading = ref(false)
+
 // }, '', true)
+//
 // window.utools.hideMainWindowTypeString("卡卡西")
 
-const activeName = ref('')
-const handleClick = () => {
+const activeName = ref('bing')
+const waterfallRef = ref()
 
+watch(activeName, async (newVal, oldVal) => {
+  if (newVal === oldVal) return
+  // console.log('activeName', newVal)
+  await handleSearch()
+})
+
+const searchImages = async () => {
+  if (searchVal.page === 0) {
+    imagesList.value = []
+  }
+  loading.value = true
+  const imgArr = await window.services.findByWord({
+    search: searchVal.search,
+    page: searchVal.page,
+    engine: searchVal.engine,
+  })
+
+  imagesList.value.push(...imgArr)
+  searchVal.page++
+  loading.value = false
+  // console.log(imagesList.value)
+}
+
+const handleSearch = async () => {
+  searchVal.search = inputVal.value
+  searchVal.page = 0
+  searchVal.engine = activeName.value
+  pageLoading.value = true
+  await searchImages()
+  await nextTick(() => {
+    waterfallRef.value?.updateWaterfall()
+  })
+  pageLoading.value = false
+}
+
+const copyHandle = async (src: string) => {
+  try {
+    const b64 = await imageToBase64(src)
+    window.utools.copyImage(b64)
+    ElMessage.success('已复制到剪切板')
+  } catch (err) {
+    // console.log(err)
+    handleError(err)
+  }
+}
+
+const saveHandle = async (src: string, name?: string) => {
+  name = name || 'default'
+  try {
+    const b64 = await imageToBase64(src)
+    // console.log('b64', b64.substring(0, 40))
+    const savePath = window.services.writeImgFile(b64, name + '.png')
+    if (!savePath) {
+      ElMessage.warning('取消保存')
+    } else {
+      ElMessage.success('保存成功')
+    }
+  } catch (err) {
+    handleError(err)
+  }
 }
 
 </script>
+
 <template>
-  <div>
-    <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-        <el-tab-pane label="" name="">
-          <div>
-            {{props.enterAction }}
-          </div>
-        </el-tab-pane>
+  <div class="fbw-page">
+    <el-row justify="center">
+      <el-col :span="12">
+        <el-row :gutter="16">
+          <el-col :span="20">
+            <el-input @keydown.enter="handleSearch" v-model="inputVal"/>
+          </el-col>
+          <el-col :span="4">
+            <el-button type="text" @click="handleSearch">
+              搜索
+            </el-button>
+          </el-col>
+        </el-row>
+      </el-col>
+    </el-row>
+
+    <el-tabs v-model="activeName" class="demo-tabs">
+      <el-tab-pane v-for="(item) in searchList" :label="item.alias" :name="item.name" :key="item.name">
+      </el-tab-pane>
     </el-tabs>
+
+    <div v-loading="pageLoading" ref="showBodyEl" class="content-body">
+      <!--        <img :src="imgBase64"/>-->
+      <Waterfall v-if="imagesList.length" :row-gap="8" :column-gap="8" :load-over-callback="searchImages" :images="imagesList">
+        <template #item="{item}">
+          <el-popover
+              trigger="click"
+              :hide-after="0"
+          >
+            <div class="center">
+              <el-button size="small" @click="copyHandle(item.data.src)" text>复制</el-button>
+              <el-button size="small" @click="saveHandle(item.url, item.data?.name)" text>保存</el-button>
+            </div>
+            <template #reference>
+              <div
+                  class="image-link link-cursor"
+              >
+                <img class="image-item" :src="item.url">
+              </div>
+            </template>
+          </el-popover>
+        </template>
+      </Waterfall>
+      <div class="load-footer" v-if="loading"><p>正在全力加载中。。。</p></div>
+    </div>
 
   </div>
 </template>
 
-
-
 <style lang="scss" scoped>
+.wq-flex {
+  display: flex;
+}
+
+.fbw-page {
+  height: calc(100vh - 40px);
+  padding: 10px;
+  .content-body {
+    height: calc(100% - 60px);
+    overflow-y: scroll;
+  }
+}
+.center {
+  display: flex;
+  align-items: center;
+}
+
+.image-link {
+  display: block;
+  height: 100%;
+  cursor: default;
+  border: #1a1a1a solid 1px;
+  width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+
+  .image-item {
+    border-radius: 8px;
+    width: 100%;
+    height: 100%;
+    //border-radius: var(--border-radius);
+    display: inline-block;
+    vertical-align: bottom;
+  }
+}
+
+.link-cursor {
+  cursor: pointer;
+}
+
+.load-footer {
+  text-align: center;
+}
 
 </style>

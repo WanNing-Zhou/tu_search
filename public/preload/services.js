@@ -1,146 +1,28 @@
 const fs = require('node:fs')
 const path = require('node:path')
+const fbw = require('./tools/findByWord')
+const fbi = require('./tools/findByImg')
 
-// const open = require('node:open')
-
-
-const request = {
-    baseAction: {
-        method: 'GET',
-    },
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-    },
-    optionFactory: function (options) {
-        const reqHeaders = Object.assign({}, this.headers, options.headers || {})
-        const reqData = Object.assign({}, this.baseAction, options)
-        reqData.headers = reqHeaders
-        return reqData
-    },
-    get: async function (url, options) {
-        const reqData = this.optionFactory(options)
-        reqData.method = 'GET'
-        const res = await fetch(url, reqData)
-        return res.json()
-    },
-    post: async function (url, options) {
-        const reqData = this.optionFactory(options)
-        reqData.method = 'POST'
-        reqData.body = JSON.stringify(reqData.body)
-        const res = await fetch(url, reqData)
-        return res.json()
-    }
-}
-
-const searchData = {
-    'lensoAi': {
-        "image": {
-            "id": '',
-            "data": '',
-        },
-        "effects": {
-            "rotation": 0,
-            "zoom": 1,
-            "pX": 0,
-            "pY": 0,
-            "cX": 0,
-            "cY": 0,
-            "cW": 1,
-            "cH": 1
-        },
-        "selection": {
-            "top": 0,
-            "left": 0,
-            "right": 1,
-            "bottom": 1
-        },
-        "domain": "",
-        "text": "",
-        "page": 0,
-        "type": "related",
-        "sort": "",
-        "seed": 0,
-        "facial_search_consent": 1
-    }
-}
-
-
-const searchList = [
-    {
-        alias: 'lensoAi识图',
-        callBack: async (param) => {
-            searchData.lensoAi.page = param.page;
-            searchData.lensoAi.image.data = param.imgBase64;
-
-            const getList = async () => {
-                const res = await request.post('https://lenso.ai/api/search', {
-                    body: searchData.lensoAi
-                })
-                console.log('lensoAires:', res)
-                const dataList = res.results?.related;
-                console.log('lensoAires:', dataList)
-                const resList = dataList.map((item) => {
-                    return {
-                        title: item.urlList[0]?.title || '',
-                        img: item.proxyUrl || item.urlList[0].imageUrl
-                    }
-                })
-                return resList;
-            }
-
-            if (param.page === 0) {
-                // 上传图片
-                const res = await request.post(" https://lenso.ai/api/upload", {
-                    body: {
-                        image: param.imgBase64
-                    }
-                })
-                searchData.lensoAi.image.id = res.id;
-            }
-
-
-            return await getList()
-        }
-    },
-
-    {
-        alias: "360识图",
-        callBack() {
-            console.log("360")
-        }
-    },
-    {
-        alias: '百度识图',
-        callBack() {
-            console.log("baidu")
-        }
-    },
-    {
-        alias: '搜狗识图',
-        callBack() {
-            console.log("搜狗")
-        }
-    },
-    {
-        alias: 'bing识图',
-        callBack() {
-            console.log("bing")
-        }
-    }
-
-];
-
-
-/**
- * @typedef {Object} SearchByImgData
- * @property {string}  imgBase64  - 图片的base64编码。
- * @property {number} page - 图片的页数。
- * @property {File} imgFile - 图片的File对象。
- */
 
 // 通过 window 对象向渲染进程注入 nodejs 能力
 window.services = {
+
+    // 根据文字搜索
+    findByWord: async(param)=>{
+        switch (param.engine){
+            case 'bing':
+                return await fbw.getBingImages(param)
+            case 'sougou':
+                return await fbw.getSouGouImages(param)
+            case 'baidu':
+                console.log('百度搜索')
+                return await fbw.getBaiduImages(param)
+            default:
+                console.error('未找到对应的搜索引擎')
+                return []
+        }
+    },
+
     // 读文件
     readFile(filePath) {
         const filename = path.basename(filePath)
@@ -149,6 +31,12 @@ window.services = {
         return new File([fs.readFileSync(filePath)], filename)
     },
 
+    /**
+     * @typedef {Object} SearchByImgData
+     * @property {string}  imgBase64  - 图片的base64编码。
+     * @property {number} page - 图片的页数。
+     * @property {File} imgFile - 图片的File对象。
+     */
 
     /**
      * 根据图片进行搜索。
@@ -158,10 +46,13 @@ window.services = {
      */
 
     async searchByImg(key, data) {
-        const searchItem = searchList.find((item) => item.alias === key)
-        if (!searchItem) return
-        const list = await searchItem.callBack(data)
-        return list
+        switch (key){
+            case 'lensoAi识图':
+                return await fbi.getLensoAiImages(data)
+            default:
+                console.error('未找到对应的搜索引擎')
+                return []
+        }
     },
 
 

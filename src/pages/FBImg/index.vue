@@ -5,9 +5,8 @@ import {onMounted, ref, watch} from "vue";
 import searchList from "./searchList";
 import {base64ToFile, fileToBase64, handleError, imageToBase64} from "../../utils.ts";
 import {UploadFilled} from "@element-plus/icons-vue";
-import {useScroll} from '@vueuse/core'
 import Waterfall from "wq-waterfall-vue3";
-// import {ElMessage} from "element-plus";
+
 
 
 type Prop = {
@@ -15,19 +14,13 @@ type Prop = {
 }
 
 const props = defineProps<Prop>()
-
 const imgFile = ref<File | null>(null)
 const imgBase64 = ref<string>('')
-
 const fileList = ref<File[]>([])
 const pageLoading = ref(false)
 const searchListVal = searchList;
-
 const activeName = ref(searchListVal[0].alias);
-
-
 const page = ref<number>(0)
-
 
 onMounted(async () => {
   if (!props.enterAction) return
@@ -51,7 +44,6 @@ onMounted(async () => {
 const uploadClickHandle = async (event: Event) => {
 
   // 启动utools选择文件
-  window.utools
   event.preventDefault()
   event.stopPropagation()
   const files = window.utools.showOpenDialog({
@@ -72,7 +64,6 @@ const uploadClickHandle = async (event: Event) => {
   const _filePath = files[0]
   try {
     const _file = window.services.readFile(_filePath)
-    console.log("file:", _file)
     // 将file对象转换为base64
     imgBase64.value = await fileToBase64(_file)
     fileList.value.push(_file)
@@ -95,14 +86,8 @@ watch(imgBase64, async (newVal, oldVal) => {
     page: 0,
   })
 
+  imagesList.value = resList
 
-  imagesList.value = resList.map((item: any) => {
-    return {
-      src: item.img,
-      name: item.title,
-    }
-  })
-  console.log('imagesList', imagesList.value)
   pageLoading.value = false
 }, {once: true})
 
@@ -118,34 +103,15 @@ const loadHandle = async () => {
     imgFile: imgFile.value as File,
     page: page.value,
   })
-  const newList = resList.map((item: any) => {
-    return {
-      src: item.img,
-      name: item.title,
-    }
-  })
 
+  imagesList.value.splice(imagesList.value.length, 0, ...resList)
 
-  imagesList.value.splice(imagesList.value.length, 0, ...newList)
-
-  console.log('newList' + page.value, newList.value)
 
   loading.value = false
 
 }
 const showBodyEl = ref()
 
-const {x, y: showBodyScrollY, isScrolling, arrivedState} = useScroll(showBodyEl)
-watch(arrivedState, async (newVal, oldVal) => {
-  const _y = showBodyScrollY.value
-  console.log('showBodyScrollY', _y)
-  if (arrivedState.bottom) {
-    await loadHandle()
-    showBodyScrollY.value = _y
-    console.log('new _y', _y)
-  }
-
-})
 
 const handleClick = (tab, event) => {
   console.log(tab, event);
@@ -179,8 +145,6 @@ const saveHandle = async (src: string, name?: string) => {
   }
 }
 
-
-
 </script>
 
 <template>
@@ -204,12 +168,15 @@ const saveHandle = async (src: string, name?: string) => {
         </div>
         <template #tip>
           <div class="el-upload__tip">
-            jpg/png files with a size less than 500kb
+            jpg/png files with a size less than 2MB
           </div>
         </template>
       </el-upload>
     </div>
+
     <div v-if="imgBase64" class="page-main">
+
+
       <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
         <template v-for="(item, index) in searchListVal" :key="index">
           <el-tab-pane :label="item.alias" :name="item.alias">
@@ -220,7 +187,7 @@ const saveHandle = async (src: string, name?: string) => {
 
       <div v-loading="pageLoading" ref="showBodyEl" class="content-body">
         <!--        <img :src="imgBase64"/>-->
-        <Waterfall  v-if="imagesList.length" :maxParallelTasks="4" :images="imagesList">
+        <Waterfall  v-if="imagesList.length" :row-gap="8" :column-gap="8" :load-over-callback="loadHandle" :maxParallelTasks="8" :images="imagesList">
           <template #item="{item}">
             <el-popover
                 trigger="click"
@@ -234,7 +201,7 @@ const saveHandle = async (src: string, name?: string) => {
                 <div
                     class="image-link link-cursor"
                 >
-<!--                  <img class="image-item" :src="item.data.src" :alt="item.data?.name"/>-->
+                  <img class="image-item" :src="item.url">
                 </div>
               </template>
             </el-popover>
@@ -259,6 +226,7 @@ const saveHandle = async (src: string, name?: string) => {
 
 .upload-comp {
   width: 80%;
+  margin-top: 40px ;
 }
 
 .icon {
@@ -283,7 +251,8 @@ const saveHandle = async (src: string, name?: string) => {
 
   .content-body {
     height: calc(100vh - 70px);
-    overflow-y: auto;
+    overflow-y: scroll;
+    overflow-x: hidden;
   }
 }
 
@@ -352,6 +321,9 @@ const saveHandle = async (src: string, name?: string) => {
   height: 100%;
   cursor: default;
   border: #1a1a1a solid 1px;
+  width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
 
   .image-item {
     border-radius: 8px;
@@ -370,7 +342,5 @@ const saveHandle = async (src: string, name?: string) => {
 .load-footer {
   text-align: center;
 }
-
-
 
 </style>
