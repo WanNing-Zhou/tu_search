@@ -192,6 +192,7 @@ const saveHandle = async (src: string, name?: string) => {
             <el-popover
                 trigger="click"
                 :hide-after="0"
+                :append-to="showBodyEl"
             >
               <div class="center">
                 <el-button size="small" @click="copyHandle(item.data.src)" text>复制</el-button>
@@ -201,7 +202,7 @@ const saveHandle = async (src: string, name?: string) => {
                 <div
                     class="image-link link-cursor"
                 >
-                  <img class="image-item" :src="item.url">
+                  <img class="image-item" :src="item.url" loading="lazy">
                 </div>
               </template>
             </el-popover>
@@ -253,6 +254,7 @@ const saveHandle = async (src: string, name?: string) => {
     height: calc(100vh - 70px);
     overflow-y: scroll;
     overflow-x: hidden;
+    position: relative;
   }
 }
 

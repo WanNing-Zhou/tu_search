@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {nextTick, reactive, ref, watch} from "vue";
+import {nextTick, onMounted, reactive, ref, watch} from "vue";
 import Waterfall from "wq-waterfall-vue3";
 import {handleError, imageToBase64} from "@/utils.ts";
 
@@ -27,6 +27,7 @@ const searchVal = reactive({
 const imagesList = ref<any[]>([])
 const pageLoading = ref(false)
 const loading = ref(false)
+const showBodyEl = ref()
 
 // }, '', true)
 //
@@ -47,7 +48,7 @@ const searchImages = async () => {
   }
   loading.value = true
   const imgArr = await window.services.findByWord({
-    search: searchVal.search,
+    search: searchVal.search || '壁纸',
     page: searchVal.page,
     engine: searchVal.engine,
   })
@@ -96,6 +97,9 @@ const saveHandle = async (src: string, name?: string) => {
     handleError(err)
   }
 }
+onMounted(()=>{
+  searchImages()
+})
 
 </script>
 
@@ -128,6 +132,7 @@ const saveHandle = async (src: string, name?: string) => {
           <el-popover
               trigger="click"
               :hide-after="0"
+              :append-to="showBodyEl"
           >
             <div class="center">
               <el-button size="small" @click="copyHandle(item.data.src)" text>复制</el-button>
@@ -137,7 +142,8 @@ const saveHandle = async (src: string, name?: string) => {
               <div
                   class="image-link link-cursor"
               >
-                <img class="image-item" :src="item.url">
+                <el-image class="image-item" :src="item.url" loading="lazy" />
+<!--                <img class="image-item" :src="item.url" loading="lazy">-->
               </div>
             </template>
           </el-popover>
@@ -156,8 +162,11 @@ const saveHandle = async (src: string, name?: string) => {
 
 .fbw-page {
   height: calc(100vh - 40px);
+  //overflow: hidden;
   padding: 10px;
+
   .content-body {
+    position: relative;
     height: calc(100% - 60px);
     overflow-y: scroll;
   }
