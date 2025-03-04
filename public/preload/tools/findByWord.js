@@ -1,5 +1,6 @@
 const cheerio = require('cheerio');
 const fbwReq = require('../request/findByWord')
+const json5 = require('json5');
 const  {handleError} = require('./utils')
 
 async function getBingImages(params){
@@ -36,16 +37,16 @@ async function getSouGouImages(params){
 
 async function getBaiduImages(params){
     let resData = await fbwReq.getBaiduSearch(params)
-    console.log('resData', resData)
+
 
     if (!resData) return []
     try {
 
-
-        // 返回resData 为字符串时转换成json
+        // 返回resData 为字符串时转换成对象
         if (typeof resData === 'string'){
-            resData = JSON.parse(resData)
+            resData = json5.parse(resData)
         }
+
         return resData.data.map((item) => {
             return {
                 src: item?.replaceUrl?.ObjURL || item?.replaceUrl?.objUrl || item?.thumbURL || '',
@@ -53,7 +54,6 @@ async function getBaiduImages(params){
             }
         })
     }catch (err){
-        console.log('err', err)
         handleError('百度响应解析失败，请联系开发者进行更新')
         return []
     }

@@ -36,7 +36,7 @@ export function fileToBase64(file: File):Promise<string> {
         reader.readAsDataURL(file)
         reader.onload = () => resolve(reader.result as string);
         reader.onerror = (error) => {
-            console.log('error reader')
+            handleError('文件读取失败')
             reject(error)} ;
     });
 }

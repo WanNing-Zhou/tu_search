@@ -125,6 +125,10 @@ const saveHandle = async (data: any) => {
   let savePath = ''
   let orgFlag = true
   pageLoading.value = true
+  ElMessage ({
+    message: '正在保存中...',
+    type: 'info',
+  })
   try {
      // 先保存原始图片
      b64 = await imageToBase64(data.orgSrc)
@@ -162,14 +166,6 @@ async function  fileChange(file: UploadFile) {
   <!--  <img :src="imgBase64">-->
   <div>
     <div class="upload-main" v-if="!imgBase64">
-<!--      <el-upload-->
-<!--          @click.capture="uploadClickHandle"-->
-<!--          class="upload-comp"-->
-<!--          drag-->
-<!--          v-model:file-list="fileList"-->
-<!--          accept="image/*"-->
-<!--          :auto-upload="false"-->
-<!--      >-->
       <el-upload
           @click.capture="uploadClickHandle"
           @change="fileChange"
@@ -186,11 +182,6 @@ async function  fileChange(file: UploadFile) {
         <div class="el-upload__text">
           拖动或 <em>点击此处</em> 上传图片
         </div>
-        <template #tip>
-          <div class="el-upload__tip">
-            jpg/png files with a size less than 2MB
-          </div>
-        </template>
       </el-upload>
     </div>
 

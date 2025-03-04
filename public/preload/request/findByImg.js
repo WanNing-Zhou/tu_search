@@ -80,7 +80,7 @@ async function getLensoAiSearch(params) {
         })
         return resData.data
     }catch(err) {
-        console.log('获取lensoAi图片失败，请联系开发者进行更新')
+        handleError('获取lensoAi图片失败，请联系开发者进行更新')
         return null
     }
 }

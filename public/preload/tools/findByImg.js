@@ -34,7 +34,6 @@ async function getLensoAiImages(param) {
             return []
         }
         const dataList = res.results?.related;
-        console.log('resList', res)
         const resList = dataList.map(item => {
             return {
                 name: item.urlList[0]?.title || '',

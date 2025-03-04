@@ -29,16 +29,12 @@ const pageLoading = ref(false)
 const loading = ref(false)
 const showBodyEl = ref()
 
-// }, '', true)
-//
-// window.utools.hideMainWindowTypeString("卡卡西")
 
 const activeName = ref('bing')
 const waterfallRef = ref()
 
 watch(activeName, async (newVal, oldVal) => {
   if (newVal === oldVal) return
-  // console.log('activeName', newVal)
   await handleSearch()
 })
 
@@ -56,7 +52,6 @@ const searchImages = async () => {
   imagesList.value.push(...imgArr)
   searchVal.page++
   loading.value = false
-  // console.log(imagesList.value)
 }
 
 const handleSearch = async () => {
@@ -77,16 +72,18 @@ const copyHandle = async (src: string) => {
     window.utools.copyImage(b64)
     ElMessage.success('已复制到剪切板')
   } catch (err) {
-    // console.log(err)
     handleError(err)
   }
 }
 
-const saveHandle = async (src: string, name?: string) => {
-  name = name || 'default'
+const saveHandle = async (src: string) => {
+  const name = Date.now()
+  ElMessage ({
+    message: '正在保存中...',
+    type: 'info',
+  })
   try {
     const b64 = await imageToBase64(src)
-    // console.log('b64', b64.substring(0, 40))
     const savePath = window.services.writeImgFile(b64, name + '.png')
     if (!savePath) {
       ElMessage.warning('取消保存')
@@ -136,7 +133,7 @@ onMounted(()=>{
           >
             <div class="center">
               <el-button size="small" @click="copyHandle(item.data.src)" text>复制</el-button>
-              <el-button size="small" @click="saveHandle(item.url, item.data?.name)" text>保存</el-button>
+              <el-button size="small" @click="saveHandle(item.url)" text>保存</el-button>
             </div>
             <template #reference>
               <div
