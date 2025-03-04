@@ -1,4 +1,5 @@
 const {request} = require("axios");
+const {handleError} = require("../tools/utils");
 
 
 /**
@@ -29,7 +30,7 @@ async function postLensoAiImg(params) {
         })
         return resData.data
     } catch (err) {
-        console.error('lensoAi图片上传错误，请联系开发者进行更新')
+        handleError('lensoAi图片上传错误，请联系开发者进行更新')
         return null
     }
 }

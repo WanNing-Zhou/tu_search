@@ -3,11 +3,10 @@
 import {onMounted, ref, watch} from "vue";
 
 import searchList from "./searchList";
-import {base64ToFile, fileToBase64, handleError, imageToBase64} from "../../utils.ts";
+import compressFile, {base64ToFile, fileToBase64, handleError, imageToBase64} from "../../utils.ts";
 import {UploadFilled} from "@element-plus/icons-vue";
 import Waterfall from "wq-waterfall-vue3";
-
-
+import {UploadFile} from "element-plus";
 
 type Prop = {
   enterAction: any
@@ -21,6 +20,13 @@ const pageLoading = ref(false)
 const searchListVal = searchList;
 const activeName = ref(searchListVal[0].alias);
 const page = ref<number>(0)
+const imagesList = ref<{
+  name: string,
+  src: string,
+  orgSrc: string
+}[]>([])
+const showBodyEl = ref()
+
 
 onMounted(async () => {
   if (!props.enterAction) return
@@ -31,7 +37,7 @@ onMounted(async () => {
       const _file = window.services.readFile(props.enterAction?.payload[0].path) as File
       imgBase64.value = await fileToBase64(_file)
     } catch (err) {
-      handleError(err)
+      handleError(new Error('文件读取错误'))
     }
 
   } else if (type === "img") {
@@ -40,6 +46,12 @@ onMounted(async () => {
     imgFile.value = base64ToFile(imgBase64.value, 'default.png')
   }
 })
+
+async function imgFileTransform(file: File) {
+  if(!file) return
+  imgFile.value = await compressFile(file)
+  imgBase64.value = await fileToBase64(imgFile.value)
+}
 
 const uploadClickHandle = async (event: Event) => {
 
@@ -51,7 +63,6 @@ const uploadClickHandle = async (event: Event) => {
     properties: ['openFile']
   })
 
-
   if (!files || files.length === 0) {
     utools.showNotification("请选择文件")
     return
@@ -60,37 +71,27 @@ const uploadClickHandle = async (event: Event) => {
     return
   }
 
-
   const _filePath = files[0]
   try {
     const _file = window.services.readFile(_filePath)
-    // 将file对象转换为base64
-    imgBase64.value = await fileToBase64(_file)
-    fileList.value.push(_file)
+    await imgFileTransform(_file)
   } catch (err) {
-    handleError(err)
+    handleError("文件读取错误")
   }
 }
 
 
-const imagesList = ref<any>([])
-
-
 watch(imgBase64, async (newVal, oldVal) => {
   if (newVal === oldVal) return
-
   pageLoading.value = true
   const resList = await window.services.searchByImg(activeName.value, {
     imgBase64: imgBase64.value,
     imgFile: imgFile.value as File,
     page: 0,
   })
-
   imagesList.value = resList
-
   pageLoading.value = false
 }, {once: true})
-
 
 const loading = ref(false);
 
@@ -103,18 +104,8 @@ const loadHandle = async () => {
     imgFile: imgFile.value as File,
     page: page.value,
   })
-
   imagesList.value.splice(imagesList.value.length, 0, ...resList)
-
-
   loading.value = false
-
-}
-const showBodyEl = ref()
-
-
-const handleClick = (tab, event) => {
-  console.log(tab, event);
 }
 
 
@@ -124,25 +115,44 @@ const copyHandle = async (src: string) => {
     window.utools.copyImage(b64)
     ElMessage.success('已复制到剪切板')
   } catch (err) {
-    console.log(err)
-    handleError(err)
+    handleError(new Error('复制失败'))
   }
 }
 
-const saveHandle = async (src: string, name?: string) => {
-  name = name || 'default'
+const saveHandle = async (data: any) => {
+  const name = Date.now()
+  let b64 = ''
+  let savePath = ''
+  let orgFlag = true
+  pageLoading.value = true
   try {
-    const b64 = await imageToBase64(src)
-    console.log('b64', b64.substring(0, 40))
-    const savePath = window.services.writeImgFile(b64, name + '.png')
-    if (!savePath) {
-      ElMessage.warning('取消保存')
-    } else {
-      ElMessage.success('保存成功')
-    }
-  } catch (err) {
-    handleError(err)
+     // 先保存原始图片
+     b64 = await imageToBase64(data.orgSrc)
+     savePath =  window.services.writeImgFile(b64, name + '.png')
+  }catch(err) {
+    // 原始图片保存失败，尝试保存压缩后的图片
+    orgFlag = false
   }
+  if (!orgFlag){
+    try {
+      b64 = await imageToBase64(data.src)
+      savePath =  window.services.writeImgFile(b64, name + '.png')
+    }catch (err){
+      handleError(new Error('文件保存错误'))
+    }
+  }
+  if (!savePath) {
+    ElMessage.warning('取消保存')
+  } else {
+    ElMessage.success('保存成功')
+  }
+  pageLoading.value = false
+}
+
+
+async function  fileChange(file: UploadFile) {
+  if (!file || !file.raw) return
+  await imgFileTransform(file.raw)
 }
 
 </script>
@@ -152,13 +162,23 @@ const saveHandle = async (src: string, name?: string) => {
   <!--  <img :src="imgBase64">-->
   <div>
     <div class="upload-main" v-if="!imgBase64">
+<!--      <el-upload-->
+<!--          @click.capture="uploadClickHandle"-->
+<!--          class="upload-comp"-->
+<!--          drag-->
+<!--          v-model:file-list="fileList"-->
+<!--          accept="image/*"-->
+<!--          :auto-upload="false"-->
+<!--      >-->
       <el-upload
           @click.capture="uploadClickHandle"
+          @change="fileChange"
           class="upload-comp"
           drag
           v-model:file-list="fileList"
-          multiple
+          accept="image/*"
           :auto-upload="false"
+          limit="1"
       >
         <el-icon class="el-icon--upload">
           <upload-filled/>
@@ -175,9 +195,7 @@ const saveHandle = async (src: string, name?: string) => {
     </div>
 
     <div v-if="imgBase64" class="page-main">
-
-
-      <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
+      <el-tabs v-model="activeName" class="demo-tabs">
         <template v-for="(item, index) in searchListVal" :key="index">
           <el-tab-pane :label="item.alias" :name="item.alias">
             <div></div>
@@ -186,8 +204,7 @@ const saveHandle = async (src: string, name?: string) => {
       </el-tabs>
 
       <div v-loading="pageLoading" ref="showBodyEl" class="content-body">
-        <!--        <img :src="imgBase64"/>-->
-        <Waterfall  v-if="imagesList.length" :row-gap="8" :column-gap="8" :load-over-callback="loadHandle" :maxParallelTasks="8" :images="imagesList">
+        <Waterfall  v-if="imagesList.length" :row-gap="8" :column-gap="8" :load-over-callback="loadHandle" :maxParallelTasks="16" :load-num="16" :images="imagesList">
           <template #item="{item}">
             <el-popover
                 trigger="click"
@@ -196,13 +213,14 @@ const saveHandle = async (src: string, name?: string) => {
             >
               <div class="center">
                 <el-button size="small" @click="copyHandle(item.data.src)" text>复制</el-button>
-                <el-button size="small" @click="saveHandle(item.url, item.data?.name)" text>保存</el-button>
+                <el-button size="small" @click="saveHandle(item.data)" text>保存</el-button>
               </div>
               <template #reference>
                 <div
                     class="image-link link-cursor"
                 >
-                  <img class="image-item" :src="item.url" loading="lazy">
+                  <el-image class="image-item" :src="item.url" loading="lazy" />
+                  <el-image class="image-item" :src="item.url" loading="lazy" />
                 </div>
               </template>
             </el-popover>

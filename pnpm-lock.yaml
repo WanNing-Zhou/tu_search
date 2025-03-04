@@ -20,6 +20,9 @@ importers:
       element-plus:
         specifier: ^2.9.3
         version: 2.9.3(vue@3.5.13)
+      image-compressor.js:
+        specifier: ^1.1.4
+        version: 1.1.4
       vue:
         specifier: ^3.5.13
         version: 3.5.13
@@ -633,6 +636,9 @@ packages:
   bluebird@3.7.2:
     resolution: {integrity: sha512-XpNj6GDQzdfW+r2Wnn7xiSAd7TM3jzkxGXBGTtWKuSXv1xUV+azxAm8jdWZN06QTQk+2N2XB9jRDkvbmQmcRtg==}
 
+  blueimp-canvas-to-blob@3.29.0:
+    resolution: {integrity: sha512-0pcSSGxC0QxT+yVkivxIqW0Y4VlO2XSDPofBAqoJ1qJxgH9eiUDLv50Rixij2cDuEfx4M6DpD9UGZpRhT5Q8qg==}
+
   boolbase@1.0.0:
     resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
 
@@ -1054,6 +1060,10 @@ packages:
   htmlparser2@3.10.1:
     resolution: {integrity: sha512-IgieNijUMbkDovyoKObU1DUhm1iwNYE/fuifEoEHfd1oZKZDaONBSkal7Y01shxsM49R4XaMdGez3WnF9UfiCQ==}
 
+  image-compressor.js@1.1.4:
+    resolution: {integrity: sha512-DF1YFSw+m6FqpXsleD4+q9eu/wFFkm8sHuYhgYy5GWFVencXeuB1/UqC12xz+dCZooPetf5LIb8JOGkgEWmlcg==}
+    deprecated: No longer maintainted, please use `comprossorjs`
+
   image-size@0.5.5:
     resolution: {integrity: sha512-6TDAlDPZxUFCv+fuOkIoXT/V/f3Qbq8e37p+YOiYrUv3v9cc3/6x78VdfPgFVaB9dZYeLUfKgHRebpkm/oP2VQ==}
     engines: {node: '>=0.10.0'}
@@ -1088,6 +1098,10 @@ packages:
   is-binary-path@2.1.0:
     resolution: {integrity: sha512-ZMERYes6pDydyuGidse7OsHxtbI7WVeUEozgR/g7rd0xUimYNlvZRE/K2MgZTjWy725IfelLeVcEM97mmtRGXw==}
     engines: {node: '>=8'}
+
+  is-blob@1.0.0:
+    resolution: {integrity: sha512-QIZDHQZpRfMEZwSTD7egdNZS7H/awVW9FZ3yJv+gg1z8d8GPXEs76QWL67fZs2BoBqp2dGtamTJpEYFJHmD73g==}
+    engines: {node: '>=0.10.0'}
 
   is-boolean-object@1.2.2:
     resolution: {integrity: sha512-wa56o2/ElJMYqjCjGkXri7it5FbebW5usLw/nPmCMs5DeZ7eziSYZhSmPRn0txqeW4LnAmQQU7FgqLpsEFKM4A==}
@@ -2397,6 +2411,8 @@ snapshots:
 
   bluebird@3.7.2: {}
 
+  blueimp-canvas-to-blob@3.29.0: {}
+
   boolbase@1.0.0: {}
 
   brace-expansion@2.0.1:
@@ -2967,6 +2983,11 @@ snapshots:
       inherits: 2.0.4
       readable-stream: 3.6.2
 
+  image-compressor.js@1.1.4:
+    dependencies:
+      blueimp-canvas-to-blob: 3.29.0
+      is-blob: 1.0.0
+
   image-size@0.5.5: {}
 
   immutable@5.0.3: {}
@@ -3004,6 +3025,8 @@ snapshots:
   is-binary-path@2.1.0:
     dependencies:
       binary-extensions: 2.3.0
+
+  is-blob@1.0.0: {}
 
   is-boolean-object@1.2.2:
     dependencies:

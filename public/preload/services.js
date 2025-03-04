@@ -2,6 +2,8 @@ const fs = require('node:fs')
 const path = require('node:path')
 const fbw = require('./tools/findByWord')
 const fbi = require('./tools/findByImg')
+const {handleError} = require('./tools/utils')
+// const mime = require('mime')
 
 
 // 通过 window 对象向渲染进程注入 nodejs 能力
@@ -15,10 +17,9 @@ window.services = {
             case 'sougou':
                 return await fbw.getSouGouImages(param)
             case 'baidu':
-                console.log('百度搜索')
                 return await fbw.getBaiduImages(param)
             default:
-                console.error('未找到对应的搜索引擎')
+                handleError(new Error('未找到对应的搜索引擎'))
                 return []
         }
     },
@@ -27,8 +28,25 @@ window.services = {
     readFile(filePath) {
         const filename = path.basename(filePath)
         utools.showNotification(`正在读取文件: ${filename}`)
+        // const type = mime.getType(filePath) || 'application/octet-stream'
+        // 判断文件扩展名
+        const ext = path.extname(filePath).toLowerCase()
+        // 根据扩展名设置文件类型
+        let type = ''
+        if (ext === '.png') {
+            type = 'image/png'
+        }
+        else if (ext === '.jpg' || ext === '.jpeg') {
+            type = 'image/jpeg'
+        }
+        else if (ext === '.gif') {
+            type = 'image/gif'
+        }
+        else {
+            type = 'application/octet-stream'
+        }
         // 将filePath 转换为前端可读的File对象
-        return new File([fs.readFileSync(filePath)], filename)
+        return new File([fs.readFileSync(filePath)], filename, {type: type} )
     },
 
     /**
@@ -50,7 +68,7 @@ window.services = {
             case 'lensoAi识图':
                 return await fbi.getLensoAiImages(data)
             default:
-                console.error('未找到对应的搜索引擎')
+                handleError(new Error('未找到对应的搜索引擎'))
                 return []
         }
     },

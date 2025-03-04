@@ -1,4 +1,5 @@
 const {request} = require("axios");
+const {handleError} = require("../tools/utils");
 
 /**
  * @interface FindByWordPrams
@@ -28,7 +29,7 @@ async function getBingContent(params){
         })
         return res.data
     }catch (err){
-        console.error('bing图片请求错误，请联系开发者进行更新')
+        handleError('bing图片请求错误，请联系开发者进行更新')
         return null
     }
 }
@@ -60,7 +61,7 @@ async function getSouGouSearch(params){
         })
         return res.data
     }catch (err){
-        console.error('sougou图片请求错误，请联系开发者进行更新')
+        handleError('sougou图片请求错误，请联系开发者进行更新')
         return null
     }
 }
@@ -77,10 +78,14 @@ async function getBaiduSearch(params){
             url: reqUrl,
             params: reqParam,
             method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
         })
         return res.data
     }catch (err){
-        console.error('baidu图片请求错误，请联系开发者进行更新')
+        handleError('baidu图片请求错误，请联系开发者进行更新')
         return null
     }
 }

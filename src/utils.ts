@@ -1,4 +1,6 @@
-import {ElMessage} from "element-plus";
+
+import ImageCompressor from 'image-compressor.js';
+import string from "async-validator/dist-types/validator/string";
 
 /**
  * 将base64转换为file
@@ -28,8 +30,6 @@ export function base64ToFile(base64: string, filename: string) {
  * @returns
  */
 
-
-
 export function fileToBase64(file: File):Promise<string> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader()
@@ -41,7 +41,13 @@ export function fileToBase64(file: File):Promise<string> {
     });
 }
 
-
+/**
+ * file转换为blob
+ * @param file
+ */
+export function fileToBlob(file: File) {
+    return new Blob([file]);
+}
 
 /**
  * 判断是否为图片
@@ -69,8 +75,15 @@ export function getFileName(url: string) {
  * @param e
  */
 
-export function handleError(e: any) {
-    utools.showNotification("嘿嘿~ 出bug啦，请反馈给开发者吧，及时修复哦~")
+export function handleError(e: Error | string) {
+    let message = '';
+    if(typeof e === 'string') {
+        message = e;
+    } else {
+        message = e.message;
+    }
+    utools.showNotification(message + "\n嘿嘿~ 出bug啦，请反馈给开发者吧，及时修复哦~");
+    console.error(e)
 }
 
 /**
@@ -98,6 +111,55 @@ export async function imageToBase64(src: string):Promise<string> {
         img.onerror = () => {
             reject(new Error('Failed to load image'));
         };
+    });
+}
+
+export default function compressFile(file: File):Promise<File> {
+    return new Promise((resolve, reject) => {
+        const options: any = {
+            success(result) {
+                // 将压缩后的 Blob 转换为 File 对象（如果组件支持Blob则不用这一步）
+                const compressedFile = new File([result], file.name, {
+                    type: file.type,
+                    lastModified: Date.now(),
+                });
+                return resolve(compressedFile);
+            },
+            error(e) {
+                return reject(e);
+            },
+        };
+        // 1-3MB
+        if (file.size > 1024 * 1024 && file.size <= 3 * 1024 * 1024) {
+            options.quality = 0.3; // 压缩质量
+            options.convertSize = false;//不进行图像尺寸的调整
+            options.checkOrientation = false; // 图片翻转，默认为false
+        }
+        // 3-4MB
+        if (file.size > 3 * 1024 * 1024 && file.size <= 4 * 1024 * 1024) {
+            options.quality = 0.25; // 压缩质量
+            options.convertSize = false;//不进行图像尺寸的调整
+            options.checkOrientation = false; // 图片翻转，默认为false
+        }
+        // 5-6MB
+        if (file.size > 5 * 1024 * 1024 && file.size <= 6 * 1024 * 1024) {
+            options.quality = 0.2; // 压缩质量
+            options.convertSize = false;//不进行图像尺寸的调整
+            options.checkOrientation = false; // 图片翻转，默认为false
+        }
+        // 6-7MB
+        if (file.size > 6 * 1024 * 1024 && file.size <= 7 * 1024 * 1024) {
+            options.quality = 0.15; // 压缩质量
+            options.convertSize = false;//不进行图像尺寸的调整
+            options.checkOrientation = false; // 图片翻转，默认为false
+        }
+        // 7-9MB
+        if (file.size > 7 * 1024 * 1024 && file.size <= 9 * 1024 * 1024) {
+            options.quality = 0.1; // 压缩质量
+            options.convertSize = false;//不进行图像尺寸的调整
+            options.checkOrientation = false; // 图片翻转，默认为false
+        }
+        new ImageCompressor(file, options);
     });
 }
 

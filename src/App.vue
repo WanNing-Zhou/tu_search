@@ -19,15 +19,6 @@ onMounted(() => {
 </script>
 
 <template>
-<!--  <template v-if="route === 'hello'">-->
-<!--    <Hello :enterAction="enterAction"></Hello>-->
-<!--  </template>-->
-<!--  <template v-if="route === 'read'">-->
-<!--    <Read :enterAction="enterAction"></Read>-->
-<!--  </template>-->
-<!--  <template v-if="route === 'write'">-->
-<!--    <Write :enterAction="enterAction"></Write>-->
-<!--  </template>-->
   <template v-if="route === 'search'">
     <FBImg :enter-action="enterAction"></FBImg>
   </template>

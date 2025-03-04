@@ -127,7 +127,7 @@ onMounted(()=>{
 
     <div v-loading="pageLoading" ref="showBodyEl" class="content-body">
       <!--        <img :src="imgBase64"/>-->
-      <Waterfall v-if="imagesList.length" :row-gap="8" :column-gap="8" :load-over-callback="searchImages" :images="imagesList">
+      <Waterfall ref="waterfallRef" :row-gap="8" :column-gap="8" :load-over-callback="searchImages" :images="imagesList">
         <template #item="{item}">
           <el-popover
               trigger="click"
@@ -143,7 +143,6 @@ onMounted(()=>{
                   class="image-link link-cursor"
               >
                 <el-image class="image-item" :src="item.url" loading="lazy" />
-<!--                <img class="image-item" :src="item.url" loading="lazy">-->
               </div>
             </template>
           </el-popover>

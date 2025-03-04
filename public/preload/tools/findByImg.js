@@ -1,4 +1,5 @@
 const fbiReq=  require('../request/findByImg')
+const {handleError} = require('./utils')
 
 
 const lensoAiParam = {
@@ -13,9 +14,13 @@ async function getLensoAiImages(param) {
            const res = await fbiReq.postLensoAiImg({
                img: param.imgBase64
            })
+           if (!res){
+               return []
+           }
            lensoAiParam.id = res.id
        } catch (err){
-           console.error('lensoAi上传数据解析异常，请联系开发者进行更新')
+           handleError(new Error('lensoAi上传数据解析异常，请联系开发者进行更新'))
+           return []
        }
     }
 
@@ -25,17 +30,21 @@ async function getLensoAiImages(param) {
             page: param.page,
             id: lensoAiParam.id
         })
+        if (!res){
+            return []
+        }
         const dataList = res.results?.related;
         console.log('resList', res)
         const resList = dataList.map(item => {
             return {
                 name: item.urlList[0]?.title || '',
-                src: item.proxyUrl || item.urlList[0].imageUrl
+                src:  item.proxyUrl || item.urlList[0].imageUrl,
+                orgSrc: item.urlList[0]?.imageUrl || item.proxyUrl,
             }
         })
         return resList
     }catch (err){
-        console.error('lensoAi搜索数据解析异常，请联系开发者进行更新')
+        handleError(new Error('lensoAi搜索数据解析异常，请联系开发者进行更新'))
         return []
     }
 }

@@ -1,8 +1,10 @@
 const cheerio = require('cheerio');
 const fbwReq = require('../request/findByWord')
+const  {handleError} = require('./utils')
 
 async function getBingImages(params){
    const resData =  await fbwReq.getBingContent(params)
+    if (!resData) return []
    const $ = cheerio.load(resData);
    const images = $('a.iusc').map((index, element)=>{
        const data = JSON.parse($(element).attr('m') || '')
@@ -18,7 +20,7 @@ async function getBingImages(params){
 
 async function getSouGouImages(params){
     const resData = await fbwReq.getSouGouSearch(params)
-    console.log(resData)
+    if (!resData) return []
     try {
         return resData.data.items.map((item) => {
             return {
@@ -27,14 +29,23 @@ async function getSouGouImages(params){
             }
         })
     }catch (err){
-        console.error('搜狗响应解析失败，请联系开发者进行更新')
+        handleError(new Error('搜狗响应解析失败，请联系开发者进行更新'))
         return []
     }
 }
 
 async function getBaiduImages(params){
-    const resData = await fbwReq.getBaiduSearch(params)
+    let resData = await fbwReq.getBaiduSearch(params)
+    console.log('resData', resData)
+
+    if (!resData) return []
     try {
+
+
+        // 返回resData 为字符串时转换成json
+        if (typeof resData === 'string'){
+            resData = JSON.parse(resData)
+        }
         return resData.data.map((item) => {
             return {
                 src: item?.replaceUrl?.ObjURL || item?.replaceUrl?.objUrl || item?.thumbURL || '',
@@ -42,7 +53,8 @@ async function getBaiduImages(params){
             }
         })
     }catch (err){
-        console.error('百度响应解析失败，请联系开发者进行更新')
+        console.log('err', err)
+        handleError('百度响应解析失败，请联系开发者进行更新')
         return []
     }
 }
